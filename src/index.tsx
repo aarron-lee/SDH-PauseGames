@@ -13,6 +13,52 @@ import { FaStream, FaPlay, FaPause, FaMoon } from "react-icons/fa";
 
 import * as backend from "./backend";
 
+const BLOCKLIST_KEY = 'PAUSE_GAMES_PLUGIN_BLOCKLIST';
+
+const DisableAppPausing: VFC<{app: backend.AppOverviewExt }> = ({ app }) => {
+  const [disabled, setForceDisable] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    const blocklist = JSON.parse(localStorage.getItem(BLOCKLIST_KEY) || '{}');
+
+    setForceDisable(Boolean(blocklist[app.appid]))
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const blocklist = JSON.parse(localStorage.getItem(BLOCKLIST_KEY) || '{}');
+
+    if (isMounted) {
+      if(disabled) {
+        blocklist[app.appid] = true;
+      } else {
+        delete blocklist[app.appid];
+      }
+
+      localStorage.setItem(BLOCKLIST_KEY, JSON.stringify(blocklist));
+    }
+  }, [disabled, setIsMounted])
+
+  return (
+    <PanelSectionRow key={app.appid}>
+      <ToggleField
+        checked={disabled}
+        key={app.appid}
+        label={
+          <div>
+            Disable Pausing for {app.display_name}
+          </div>
+        }
+        onChange={(enabled) => {
+          setForceDisable(enabled)
+        }}
+      />
+      {!disabled && <AppItem app={app} />}
+    </PanelSectionRow> 
+  )
+}
+
 const AppItem: VFC<{ app: backend.AppOverviewExt }> = ({ app }) => {
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [hasStickyPauseState, setHasStickyPauseState] =
@@ -162,9 +208,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
       )}
       {runningApps.length ? (
         runningApps.map((app) => (
-          <PanelSectionRow key={app.appid}>
-            <AppItem app={app} />
-          </PanelSectionRow>
+          <DisableAppPausing app={app} />
         ))
       ) : (
         <div style={{ fontSize: "80%" }}>

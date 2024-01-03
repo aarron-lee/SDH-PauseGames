@@ -9,6 +9,7 @@ import {
 import { debounce, throttle } from "lodash";
 
 const LOCAL_STORAGE_KEY = "pause-games-settings";
+const BLOCKLIST_KEY = 'PAUSE_GAMES_PLUGIN_BLOCKLIST';
 
 // only the needed subset of the SteamClient
 declare var SteamClient: {
@@ -289,8 +290,13 @@ export function setupSuspendResumeHandler(): () => void {
     SteamClient.System.RegisterForOnSuspendRequest(async () => {
       systemWillSuspend = true;
       if (!(await loadSettings()).pauseBeforeSuspend) return;
+
+      const blocklistedAppIds = JSON.parse(localStorage.getItem(BLOCKLIST_KEY) || '{}')
+
       await Promise.all(
-        (Router.RunningApps as AppOverviewExt[]).map(async (a) => {
+        (Router.RunningApps as AppOverviewExt[]).filter(app => {
+          return !Boolean(blocklistedAppIds[app.appid])
+        }).map(async (a) => {
           const appMD = await getAppMetaData(Number(a.appid));
           appMD.is_paused = await is_paused(appMD.instanceid);
           appMD.last_pause_state = appMD.is_paused;
@@ -392,8 +398,13 @@ export function setupFocusChangeHandler(): () => void {
         } else {
           return;
         }
+
+        const blocklistedAppIds = JSON.parse(localStorage.getItem(BLOCKLIST_KEY) || '{}')
+
         await Promise.all(
-          (Router.RunningApps as AppOverviewExt[]).map(async (a) => {
+          (Router.RunningApps as AppOverviewExt[]).filter(app => {
+            return !Boolean(blocklistedAppIds[app.appid])
+          }).map(async (a) => {
             const appMD = await getAppMetaData(Number(a.appid));
             // if the sticky pause state is on for this app don't do anything to it
             if (appMD.sticky_state) {
