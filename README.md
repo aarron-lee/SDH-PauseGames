@@ -1,4 +1,14 @@
-# Pause Games
+# Pause Games - FORK
+
+# This is for personal use only, no support will be provided for this fork!
+
+## Install
+
+```
+curl -L "https://github.com/aarron-lee/SDH-PauseGames/raw/main/install.sh" | sh
+```
+
+---
 
 A Steam Deck plugin for the [Decky Plugin Loader](https://github.com/SteamDeckHomebrew/decky-loader) that makes it possible to pause and resume games even for those that don't have an immediate pause option.
 
@@ -6,7 +16,7 @@ Useful for when you wish to temporarily suspend an application in order to redir
 
 Since used RAM and VRAM won't be able to be recovered from paused apps you might look into tweaking your swapfile to make things smoother: https://github.com/CryoByte33/steam-deck-utilities
 
-It sends the `SIGSTOP` signal to all the children of the reaper process to stop the execution and `SIGCONT` to resume them. ([Signal (IPC)](https://en.wikipedia.org/wiki/Signal_(IPC)))
+It sends the `SIGSTOP` signal to all the children of the reaper process to stop the execution and `SIGCONT` to resume them. ([Signal (IPC)](<https://en.wikipedia.org/wiki/Signal_(IPC)>))
 
 ![](assets/20230112202158_1.png)
 ![](assets/20230112200757_1.jpg)
@@ -26,8 +36,8 @@ In addition to **Pause on focus loss**, **Also on overlay** will also pause apps
 
 - options to terminate and force kill more "thoroughly" and immediately a process tree
 - checkpoint/restore support with [CRIU](https://github.com/checkpoint-restore/criu) to make it possible to dump and restore a game to/from disk (savestates)
-  + I already conducted some experiments but the biggest hurdle are the sockets and dri devices which would require many interdependant processes to be checkpointed too
-  + A completely isolated process and resource tree seems to be the only viable way currently to get something working (see podman/docker checkpoint/restore) but even then there are host only sockets (pipewire, wayland, xorg) that would need to be taken into account too for games to work
+  - I already conducted some experiments but the biggest hurdle are the sockets and dri devices which would require many interdependant processes to be checkpointed too
+  - A completely isolated process and resource tree seems to be the only viable way currently to get something working (see podman/docker checkpoint/restore) but even then there are host only sockets (pipewire, wayland, xorg) that would need to be taken into account too for games to work
 
 ## Usage Examples
 
