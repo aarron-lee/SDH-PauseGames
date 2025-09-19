@@ -6,6 +6,12 @@ This is a continuation of **popsUlfr's Pause Games** plugin, updated to support 
 
 A big thanks to **popsUlfr** for developing this amazing plugin!
 
+# Install Script
+
+```
+curl -L https://github.com/aarron-lee/SDH-PauseGames/raw/main/install.sh | sh
+```
+
 ***
 
 A Steam Deck plugin for the [Decky Plugin Loader](https://github.com/SteamDeckHomebrew/decky-loader) that makes it possible to pause and resume games even for those that don't have an immediate pause option.
