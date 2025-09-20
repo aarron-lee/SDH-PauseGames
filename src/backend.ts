@@ -14,6 +14,10 @@ import {
   resume,
 } from "./interop";
 import { Settings } from "./settings";
+import {
+  getResumeObservable,
+  getSuspendObservable,
+} from "./sleep/suspendResumeObservables";
 
 // only the needed subset of the SteamClient
 declare var SteamClient: {
@@ -273,36 +277,38 @@ export function setupSuspendResumeHandler(): () => void {
       }),
     );
   };
-  try {
-    const { unregister: unregisterOnSuspendRequest } =
-      SteamClient.System.RegisterForOnSuspendRequest(onSuspend);
 
-    const { unregister: unregisterOnResumeFromSuspend } =
-      SteamClient.System.RegisterForOnResumeFromSuspend(onResume);
+  const suspendObservable = getSuspendObservable();
+  const resumeObservable = getResumeObservable();
 
-    return () => {
-      unregisterOnSuspendRequest();
-      unregisterOnResumeFromSuspend();
-    };
-  } catch (e) {
-    console.error(e);
-  }
+  const unregisterOnSuspendRequest = suspendObservable?.observe_((change) => {
+    const { newValue } = change;
 
-  // fallback to SteamClient.User
-  try {
-    const { unregister: unregisterOnSuspendRequest } =
-      SteamClient.User.RegisterForPrepareForSystemSuspendProgress(onSuspend);
+    console.log({ info: `mobX suspend triggered with ${newValue}` });
 
-    const { unregister: unregisterOnResumeFromSuspend } =
-      SteamClient.User.RegisterForResumeSuspendedGamesProgress(onResume);
+    if (!newValue) {
+      return;
+    }
 
-    return () => {
-      unregisterOnSuspendRequest();
-      unregisterOnResumeFromSuspend();
-    };
-  } catch (e) {
-    console.error(e);
-  }
+    onSuspend();
+  });
+
+  const unregisterOnResumeFromSuspend = resumeObservable?.observe_((change) => {
+    const { newValue } = change;
+
+    console.log({ info: `mobX suspend triggered with ${newValue}` });
+
+    if (!newValue) {
+      return;
+    }
+
+    onResume();
+  });
+
+  return () => {
+    unregisterOnSuspendRequest && unregisterOnSuspendRequest();
+    unregisterOnResumeFromSuspend && unregisterOnResumeFromSuspend();
+  };
 }
 
 export function setupFocusChangeHandler(): () => void {
